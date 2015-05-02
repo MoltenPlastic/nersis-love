@@ -10,6 +10,7 @@ using namespace love::graphics;
 using namespace nersis;
 
 class TestModule : public NModule {
+	double angle = 0;
 	public:
 	TestModule() {
 		name = "testmodule";
@@ -21,11 +22,19 @@ class TestModule : public NModule {
 	virtual ~TestModule() {};
 	
 	virtual void draw();
+	virtual void update(double dt);
 };
+
+void TestModule::update(double dt) {
+	angle += dt;
+}
 
 void TestModule::draw() {
 	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
+	graphics->push();
+	graphics->rotate(angle);
 	graphics->rectangle(Graphics::DRAW_FILL, 0, 0, 64, 64);
+	graphics->pop();
 }
 
 LUALIB_API int luaopen_nersis_testmodule(lua_State *L) {

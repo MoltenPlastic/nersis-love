@@ -15,4 +15,4 @@ for i, file in pairs(files) do
 	printExec(cc.." "..table.concat(flags," ").." "..file.." -o "..file:gsub("%.cpp",".o"))
 end
 
-printExec(cc.." -shared -L.. -l:core.so -fpic -o "..out.." "..table.concat(files," "):gsub("%.cpp",".o"))
+printExec(cc.." -shared -fpic -o "..out.." "..table.concat(files," "):gsub("%.cpp",".o"))

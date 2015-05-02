@@ -58,7 +58,7 @@ static int nersis_core_love_load(lua_State *L) {
 }
 
 static int nersis_core_love_update(lua_State *L) {
-	double dt = lua_tonumber(L, 0);
+	double dt = lua_tonumber(L, 1);
 	for (auto module : nersis::moduleList()) {
 		module->update(dt);
 	}
@@ -72,11 +72,50 @@ static int nersis_core_love_draw(lua_State *L) {
 	return 0;
 }
 
+static int nersis_core_love_focus(lua_State *L) {
+	bool focus = lua_toboolean(L, 1);
+	for (auto module : nersis::moduleList()) {
+		module->focus(focus);
+	}
+	return 0;
+}
+
+static int nersis_core_love_keypressed(lua_State *L) {
+	love::keyboard::Keyboard::Key key;
+	love::keyboard::Keyboard::getConstant(lua_tostring(L, 1), key);
+	bool isRepeat = lua_toboolean(L, 2);
+	for (auto module : nersis::moduleList()) {
+		module->keyPressed(key, isRepeat);
+	}
+	return 0;
+}
+
+static int nersis_core_love_keyreleased(lua_State *L) {
+	love::keyboard::Keyboard::Key key;
+	love::keyboard::Keyboard::getConstant(lua_tostring(L, 1), key);
+	for (auto module : nersis::moduleList()) {
+		module->keyReleased(key);
+	}
+	return 0;
+}
+
+static int nersis_core_love_mousefocus(lua_State *L) {
+	bool focus = lua_toboolean(L, 1);
+	for (auto module : nersis::moduleList()) {
+		module->mouseFocus(focus);
+	}
+	return 0;
+}
+
 static const luaL_Reg nersis_corelib[] = {
 	{"hello", nersis_core_hello},
 	{"love_load", nersis_core_love_load},
 	{"love_update", nersis_core_love_update},
 	{"love_draw", nersis_core_love_draw},
+	{"love_focus", nersis_core_love_focus},
+	{"love_keypressed", nersis_core_love_keypressed},
+	{"love_keyreleased", nersis_core_love_keyreleased},
+	{"love_mousefocus", nersis_core_love_mousefocus},
 	{NULL, NULL}
 };
 

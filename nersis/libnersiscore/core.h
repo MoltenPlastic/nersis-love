@@ -32,6 +32,7 @@ extern "C" {
 #include <string>
 #include <vector>
 #include <thread/LuaThread.h>
+#include <keyboard/Keyboard.h>
 
 namespace nersis {
 	class NERSIS_API NModule {
@@ -46,14 +47,14 @@ namespace nersis {
 		virtual void draw() {};
 	
 		virtual void focus(bool windowFocus) {};
-		virtual void keyPressed(std::string key, bool isRepeat) {};
-		virtual void keyReleased(std::string key) {};
+		virtual void keyPressed(love::keyboard::Keyboard::Key key, bool isRepeat) {};
+		virtual void keyReleased(love::keyboard::Keyboard::Key key) {};
 		virtual void mouseFocus(bool mouseFocus) {};
-		virtual void mouseMoved(double x, double y, double dx, double dy) {};
-		virtual void mousePressed(double x, double y, int button) {};
-		virtual void mouseReleased(double x, double y, int button) {};
+		virtual void mouseMoved(int x, int y, int dx, int dy) {};
+		virtual void mousePressed(int x, int y, int button) {};
+		virtual void mouseReleased(int x, int y, int button) {};
 		virtual bool quit() {};
-		virtual void resize(double w, double h) {};
+		virtual void resize(int w, int h) {};
 		virtual void textInput(std::string text) {};
 		virtual void threadError(love::thread::LuaThread thread, std::string error) {};
 		virtual void visible(bool visibility) {};
