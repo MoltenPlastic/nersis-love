@@ -1,9 +1,5 @@
-#define LUA_LIB
-extern "C" {
-	#include <lua5.1/lua.h>
-	#include <lua5.1/lauxlib.h>
-	#include <lua5.1/luaconf.h>
-}
+#include "core.h"
+
 #include "window/Window.h"
 #include "graphics/opengl/Graphics.h"
 #include "graphics/Color.h"
@@ -17,8 +13,10 @@ using namespace love;
 using namespace love::window;
 using namespace love::graphics;
 
+using namespace nersis;
+
 static int nersis_core_hello(lua_State *L) {
-	printf("Hello from Nersis Core!\n");
+	printf("Hello from libnersiscore!\n");
 	Window::singleton->setWindow(600,200);
 	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
 	graphics->setBackgroundColor(Color(255,255,255,255));

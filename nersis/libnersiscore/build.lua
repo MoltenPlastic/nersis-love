@@ -1,6 +1,6 @@
 local cc = "gcc"
 local files = {"core.cpp"} --these need to be in a certain order
-local flags = {"-fpic","-shared","-O3","-std=c++11","-I../liblove","-I../liblove/modules"}
+local flags = {"-fpic","-shared","-O3","-std=c++11","-I../liblove","-I../liblove/modules","-I/usr/include/lua5.1"}
 local out = "../core.so"
 
 function printExec(cmdline)
