@@ -1,4 +1,5 @@
 #include "core.h"
+#include <map>
 
 #include "window/Window.h"
 #include "graphics/opengl/Graphics.h"
@@ -13,7 +14,22 @@ using namespace love;
 using namespace love::window;
 using namespace love::graphics;
 
-using namespace nersis;
+namespace nersis {
+	std::vector<NModule*> modules;
+	std::map<std::string, NModule*> moduleMap;
+	
+	void registerModule(NModule *module) {
+		modules.push_back(module);
+	}
+	
+	NModule *findModule(std::string name) {
+		return moduleMap[name];
+	}
+	
+	std::vector<NModule*> moduleList() {
+		return modules;
+	}
+}
 
 static int nersis_core_hello(lua_State *L) {
 	printf("Hello from libnersiscore!\n");
@@ -23,8 +39,13 @@ static int nersis_core_hello(lua_State *L) {
 	return 0;
 }
 
+static int nersis_core_love_load(lua_State *L) {
+	
+}
+
 static const luaL_Reg nersis_corelib[] = {
 	{"hello", nersis_core_hello},
+	{"love_load", nersis_core_love_load},
 	{NULL, NULL}
 };
 
