@@ -1,7 +1,7 @@
 local cc = "gcc"
-local files = {"module.cpp"} --these need to be in a certain order
+local files = {"dummy.cpp"} --these need to be in a certain order
 local flags = {"-c","-fpic","-O2","-std=c++11","-I../liblove","-I../liblove/modules","-I../libnersiscore","-I/usr/include/lua5.1"}
-local out = "../testmodule.so"
+local out = "../fucklimitations.so"
 
 function printExec(cmdline)
 	print("> "..cmdline)
@@ -15,4 +15,4 @@ for i, file in pairs(files) do
 	printExec(cc.." "..table.concat(flags," ").." "..file.." -o "..file:gsub("%.cpp",".o"))
 end
 
-printExec(cc.." -shared -L.. -l:core.so -fpic -o "..out.." "..table.concat(files," "):gsub("%.cpp",".o"))
+printExec(cc.." -shared -fpic -o "..out.." "..table.concat(files," "):gsub("%.cpp",".o"))

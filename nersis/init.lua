@@ -2,8 +2,7 @@ local nersis = {}
 nersis.VERSION = "Applebutter v1"
 
 function nersis.init()
-	--use ffi to open nersis.core globally--
-	require "ffi".load("nersis/core.so",true)
+	require "nersis.fucklimitations" --loads nersis.core with RTLD_GLOBAL
 	nersis.core = require "nersis.core" --require the core library shared object
 	nersis.core.hello()
 	
