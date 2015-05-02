@@ -3,4 +3,4 @@
 nersis = require "nersis"
 
 nersis.init()
-
+nersis.loadModule "testmodule"

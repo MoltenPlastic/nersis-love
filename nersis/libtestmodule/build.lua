@@ -1,7 +1,7 @@
 local cc = "gcc"
-local files = {"core.cpp"} --these need to be in a certain order
-local flags = {"-c","-fpic","-O2","-std=c++11","-I../liblove","-I../liblove/modules","-I/usr/include/lua5.1"}
-local out = "../core.so"
+local files = {"module.cpp"} --these need to be in a certain order
+local flags = {"-c","-fpic","-O2","-std=c++11","-I../liblove","-I../liblove/modules","-I../libnersiscore","-I/usr/include/lua5.1"}
+local out = "../testmodule.so"
 
 function printExec(cmdline)
 	print("> "..cmdline)
