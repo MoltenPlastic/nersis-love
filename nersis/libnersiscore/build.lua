@@ -5,9 +5,11 @@ local out = "../core.so"
 
 function printExec(cmdline)
 	print("> "..cmdline)
-	local status = os.execute(cmdline)
-	if status ~= 0 then
-		error("Command failed!")
+	local result,status,code=os.execute(cmdline)
+	if type(result)=="number" and result~=0 then
+		error("Command failed with error code "..result)
+	elseif not result then
+		error("Command failed with "..(status or "error").." code "..code)
 	end
 end
 
