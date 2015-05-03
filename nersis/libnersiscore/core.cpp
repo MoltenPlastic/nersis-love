@@ -4,6 +4,9 @@
 #include "window/Window.h"
 #include "graphics/opengl/Graphics.h"
 #include "graphics/Color.h"
+#include "math/MathModule.h"
+#include "event/sdl/Event.h"
+#include "timer/Timer.h"
 #include "common/Module.h"
 
 #if LUA_VERSION_NUM > 501
@@ -13,6 +16,9 @@
 using namespace love;
 using namespace love::window;
 using namespace love::graphics;
+using namespace love::math;
+using namespace love::event::sdl;
+using namespace love::timer;
 
 namespace nersis {
 	std::vector<NModule*> modules;
@@ -42,80 +48,82 @@ class FuckCPPModule : public nersis::NModule {
 
 static int nersis_core_hello(lua_State *L) {
 	printf("Hello from libnersiscore!\n");
-	Window::singleton->setWindow(600,200);
+	/*Window::singleton->setWindow(600,200);
 	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
-	graphics->setBackgroundColor(Color(255,255,255,255));
+	graphics->setBackgroundColor(Color(255,255,255,255));*/
 	
 	nersis::registerModule(new FuckCPPModule());
 	return 0;
 }
 
-static int nersis_core_love_load(lua_State *L) {
+static int nersis_core_love_run(lua_State *L) {
+	Math *math = Module::getInstance<Math>(Module::M_MATH);
+	Timer *timer = Module::getInstance<Timer>(Module::M_TIMER);
+	Window *window = Module::getInstance<Window>(Module::M_WINDOW);
+	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
+	
+	RandomGenerator::Seed seed; //will be random
+	math->setRandomSeed(seed);
+	
+	//we manually keep track of SDL Events for the sake of Event module conversions that we don't want
+	//we can still use part of the event modules to push said conversions to lua
+
 	for (auto module : nersis::moduleList()) {
 		module->load();
 	}
-	return 0;
-}
-
-static int nersis_core_love_update(lua_State *L) {
-	double dt = lua_tonumber(L, 1);
-	for (auto module : nersis::moduleList()) {
-		module->update(dt);
+	
+	timer->step();
+	
+	double dt = 0;
+	
+	//main loop
+	while (true) {
+		//process events
+		SDL_Event e;
+		while (SDL_PollEvent(&e))
+		{
+			switch (e.type)
+			{
+			case SDL_QUIT:
+			case SDL_APP_TERMINATING: {
+				bool canQuit = true;
+				for (auto module : nersis::moduleList()) {
+					if (module->quit()) {
+						canQuit = false;
+						break;
+					}
+				}
+				if (canQuit)
+					return 0;
+			}
+			}
+		}
+	
+		timer->step();
+		dt = timer->getDelta();
+	
+		for (auto module : nersis::moduleList()) {
+			module->update(dt);
+		}
+		
+		if (window->isCreated()) {
+			graphics->clear(graphics->getBackgroundColor());
+			graphics->origin();
+			for (auto module : nersis::moduleList()) {
+				module->draw();
+			}
+			graphics->present();
+		}
+		
+		timer->sleep(0.001);
 	}
-	return 0;
-}
-
-static int nersis_core_love_draw(lua_State *L) {
-	for (auto module : nersis::moduleList()) {
-		module->draw();
-	}
-	return 0;
-}
-
-static int nersis_core_love_focus(lua_State *L) {
-	bool focus = lua_toboolean(L, 1);
-	for (auto module : nersis::moduleList()) {
-		module->focus(focus);
-	}
-	return 0;
-}
-
-static int nersis_core_love_keypressed(lua_State *L) {
-	love::keyboard::Keyboard::Key key;
-	love::keyboard::Keyboard::getConstant(lua_tostring(L, 1), key);
-	bool isRepeat = lua_toboolean(L, 2);
-	for (auto module : nersis::moduleList()) {
-		module->keyPressed(key, isRepeat);
-	}
-	return 0;
-}
-
-static int nersis_core_love_keyreleased(lua_State *L) {
-	love::keyboard::Keyboard::Key key;
-	love::keyboard::Keyboard::getConstant(lua_tostring(L, 1), key);
-	for (auto module : nersis::moduleList()) {
-		module->keyReleased(key);
-	}
-	return 0;
-}
-
-static int nersis_core_love_mousefocus(lua_State *L) {
-	bool focus = lua_toboolean(L, 1);
-	for (auto module : nersis::moduleList()) {
-		module->mouseFocus(focus);
-	}
+	
 	return 0;
 }
 
 static const luaL_Reg nersis_corelib[] = {
 	{"hello", nersis_core_hello},
-	{"love_load", nersis_core_love_load},
-	{"love_update", nersis_core_love_update},
-	{"love_draw", nersis_core_love_draw},
-	{"love_focus", nersis_core_love_focus},
-	{"love_keypressed", nersis_core_love_keypressed},
-	{"love_keyreleased", nersis_core_love_keyreleased},
-	{"love_mousefocus", nersis_core_love_mousefocus},
+	{"love_run", nersis_core_love_run},
 	{NULL, NULL}
 };
 

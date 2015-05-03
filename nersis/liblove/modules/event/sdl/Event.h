@@ -66,7 +66,7 @@ public:
 	 */
 	void clear();
 
-private:
+//private: I need to use these
 
 	Message *convert(const SDL_Event &e) const;
 	Message *convertJoystickEvent(const SDL_Event &e) const;

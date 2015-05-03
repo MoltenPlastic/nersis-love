@@ -9,12 +9,7 @@ function nersis.init()
 	nersis.core = require "nersis.core" --require the core library shared object
 	nersis.core.hello()
 	
-	for i, v in pairs(nersis.core) do
-		if i:sub(1,5) == "love_" then
-			--install love2d hook--
-			love[i:sub(6)] = v
-		end
-	end
+	love.run = nersis.core.love_run
 end
 
 function nersis.loadModule(name)
