@@ -1,12 +1,13 @@
 // vector library
 // Provides determenistic 2d vector and angle calculations
 
+#include <math.h>
 #include "base/vector.hpp"
 
-vecNum sqrt(vecNum a) {
-	vecNum op=a;
-	vecNum res=0;
-	vecNum one=1<<((sizeof(vecNum)*8)-2); // second to top bit
+unsigned vecNum sqrt(vecNum a) {
+	unsigned vecNum op=a;
+	unsigned vecNum res=0;
+	unsigned vecNum one=1<<((sizeof(vecNum)*8)-2); // second to top bit
 	while (one>op) {
 		one>>=2;
 	}
@@ -47,5 +48,5 @@ vec vec::normalize(vecNum distance,vec base) {
 }
 
 angNum atan2(vecNum x,vecNum y) {
-
+	return fmod(atan2(x,y),M_PI*2)*(2^sizeof());
 }

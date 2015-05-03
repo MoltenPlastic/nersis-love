@@ -1,22 +1,20 @@
 #include <vector>
-#include "base/list.hpp"
-#include "base/time.hpp"
-#include "base/vector.hpp"
+#include "physics/vector.hpp"
 
 namespace physics {
-	typedef physNum int64_t;
+	typedef PhysNum int64_t;
 	typedef void (*)(object,object) collisionCallback;
 
 	class collisionHandle {
 		collisionCallback callback;
-		physNum softness;
+		PhysNum softness;
 	}
 	
 	class object {
 		collisionHandle collision;
 		group* parent;
-		physNum mass;
-		std::vector<vec> poly;
+		PhysNum mass;
+		std::vector<Vec> poly;
 		Vec pos;
 		void split
 	};
@@ -24,12 +22,14 @@ namespace physics {
 	class group {
 		state* parent;
 		std::vector<object> objects;
+		Vec pos;
 		Vec vel;
 	};
 
 	class state {
 		std::vector<group> groups;
-		physNum velDampening;
-		physNum angDampening;
+		PhysNum velDampening;
+		PhysNum angDampening;
+		void run(int dt);
 	};
 }

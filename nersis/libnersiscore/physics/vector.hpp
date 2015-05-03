@@ -1,5 +1,5 @@
 typedef vecNum int64_t;
-typedef angNum int32_t;
+typedef angNum uint32_t;
 
 class vec {
 	vecNum x;
