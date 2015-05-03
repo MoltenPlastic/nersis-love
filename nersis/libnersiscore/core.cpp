@@ -141,6 +141,21 @@ static int nersis_core_love_run(lua_State *L) {
 					module->textInput(e.text.text);
 				}
 				break;
+			case SDL_MOUSEMOTION:
+				for (auto module : nersis::moduleList()) {
+					module->mouseMoved(e.motion.x,e.motion.y,e.motion.xrel,e.motion.yrel);
+				}
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				for (auto module : nersis::moduleList()) {
+					module->mousePressed(e.button.x,e.button.y,e.button.button);
+				}
+				break;
+			case SDL_MOUSEBUTTONUP:
+				for (auto module : nersis::moduleList()) {
+					module->mouseReleased(e.button.x,e.button.y,e.button.button);
+				}
+				break;
 			}
 		}
 	

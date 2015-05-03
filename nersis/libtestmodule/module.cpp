@@ -2,11 +2,13 @@
 #include "window/Window.h"
 #include "graphics/opengl/Graphics.h"
 #include "graphics/Color.h"
+#include "mouse/Mouse.h"
 #include "common/Module.h"
 
 using namespace love;
 using namespace love::window;
 using namespace love::graphics;
+using namespace love::mouse;
 using namespace nersis;
 
 class TestModule : public NModule {
@@ -31,7 +33,9 @@ void TestModule::update(double dt) {
 
 void TestModule::draw() {
 	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
+	Mouse *mouse = Module::getInstance<Mouse>(Module::M_MOUSE);
 	graphics->push();
+	graphics->translate(mouse->getX(), mouse->getY());
 	graphics->rotate(angle);
 	graphics->rectangle(Graphics::DRAW_FILL, 0, 0, 64, 64);
 	graphics->pop();
