@@ -34,6 +34,8 @@ extern "C" {
 #include <thread/LuaThread.h>
 #include <keyboard/Keyboard.h>
 
+#include <SDL_events.h>
+
 namespace nersis {
 	class NERSIS_API NModule {
 		public:
@@ -58,9 +60,15 @@ namespace nersis {
 		virtual void textInput(std::string text) {};
 		virtual void threadError(love::thread::LuaThread thread, std::string error) {};
 		virtual void visible(bool visibility) {};
+		
+		virtual void sdlEvent(SDL_Event e) {};
 	};
 
 	NERSIS_API void registerModule(NModule *module);
-	NERSIS_API NModule *findModule(std::string name);
+	NERSIS_API NModule *getModule(std::string name);
+	template <typename T>
+	static T *getModule(std::string name) {
+		return (T*) getModule(name);
+	}
 	NERSIS_API std::vector<NModule*> moduleList();
 }

@@ -19,6 +19,7 @@ using namespace love::graphics;
 using namespace love::math;
 using namespace love::event::sdl;
 using namespace love::timer;
+using namespace love::keyboard;
 
 namespace nersis {
 	std::vector<NModule*> modules;
@@ -28,7 +29,7 @@ namespace nersis {
 		modules.push_back(module);
 	}
 	
-	NModule *findModule(std::string name) {
+	NModule *getModule(std::string name) {
 		return moduleMap[name];
 	}
 	
@@ -42,7 +43,7 @@ class FuckCPPModule : public nersis::NModule {
 	public:
 	FuckCPPModule() {
 		name = "FUCKCPPMODULE";
-		printf("Hello from modload!\n");
+		printf("Hello from core dummy module!\n");
 	}
 };
 
@@ -61,6 +62,7 @@ static int nersis_core_love_run(lua_State *L) {
 	Timer *timer = Module::getInstance<Timer>(Module::M_TIMER);
 	Window *window = Module::getInstance<Window>(Module::M_WINDOW);
 	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
+	Keyboard *keyboard = Module::getInstance<Keyboard>(Module::M_KEYBOARD);
 	
 	RandomGenerator::Seed seed; //will be random
 	math->setRandomSeed(seed);
@@ -82,6 +84,10 @@ static int nersis_core_love_run(lua_State *L) {
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
 		{
+			for (auto module : nersis::moduleList()) {
+				module->sdlEvent(e);
+			}
+			
 			switch (e.type)
 			{
 			case SDL_QUIT:
@@ -95,7 +101,44 @@ static int nersis_core_love_run(lua_State *L) {
 				}
 				if (canQuit)
 					return 0;
+				break;
 			}
+			case SDL_KEYDOWN: {
+				love::keyboard::Keyboard::Key key;
+				std::map<SDL_Keycode, love::keyboard::Keyboard::Key>::const_iterator keyit;
+				if (e.key.repeat)
+				{
+					if (!keyboard->hasKeyRepeat())
+						break;
+				}
+
+				keyit = Event::keys.find(e.key.keysym.sym);
+				if (keyit != Event::keys.end())
+					key = keyit->second;
+				
+				for (auto module : nersis::moduleList()) {
+					module->keyPressed(key, e.key.repeat);
+				}
+				break;
+			}
+			case SDL_KEYUP: {
+				love::keyboard::Keyboard::Key key;
+				std::map<SDL_Keycode, love::keyboard::Keyboard::Key>::const_iterator keyit;
+
+				keyit = Event::keys.find(e.key.keysym.sym);
+				if (keyit != Event::keys.end())
+					key = keyit->second;
+				
+				for (auto module : nersis::moduleList()) {
+					module->keyReleased(key);
+				}
+				break;
+			}
+			case SDL_TEXTINPUT:
+				for (auto module : nersis::moduleList()) {
+					module->textInput(e.text.text);
+				}
+				break;
 			}
 		}
 	

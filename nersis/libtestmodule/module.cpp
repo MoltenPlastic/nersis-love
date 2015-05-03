@@ -15,14 +15,14 @@ class TestModule : public NModule {
 	TestModule() {
 		name = "testmodule";
 		printf("Hello from libtestmodule!\n");
-		opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
-		graphics->setBackgroundColor(Color(255,0,0,255));
 	}
 	
 	virtual ~TestModule() {};
 	
 	virtual void draw();
 	virtual void update(double dt);
+	
+	virtual void keyPressed(love::keyboard::Keyboard::Key key, bool repeat);
 };
 
 void TestModule::update(double dt) {
@@ -37,7 +37,11 @@ void TestModule::draw() {
 	graphics->pop();
 }
 
-LUALIB_API int luaopen_nersis_testmodule(lua_State *L) {
+void TestModule::keyPressed(love::keyboard::Keyboard::Key key, bool repeat) {
+	printf("Key pressed!\n");
+}
+
+LUALIB_API int luaopen_nersis_testmodule(lua_State *L) { //A message to module authors: Do not expect lua_State to be defined!
 	registerModule(new TestModule());
 	return 0;
 }
