@@ -94,7 +94,9 @@ static int nersis_core_love_run(lua_State *L) {
 			case SDL_APP_TERMINATING: {
 				bool canQuit = true;
 				for (auto module : nersis::moduleList()) {
-					if (module->quit()) {
+					bool q = module->quit();
+					if (q) {
+						printf("module %s requested not to quit! %d\n", module->name.c_str(), q);
 						canQuit = false;
 						break;
 					}
@@ -170,7 +172,13 @@ static const luaL_Reg nersis_corelib[] = {
 	{NULL, NULL}
 };
 
+static int nersis_core_panic(lua_State *L) {
+	printf("%s\n",lua_tostring(L,1));
+	return 0;
+}
+
 LUALIB_API int luaopen_nersis_core(lua_State *L) {
+	lua_atpanic(L, nersis_core_panic);
 	luaL_register(L, "nersis.core", nersis_corelib);
 	return 1;
 }

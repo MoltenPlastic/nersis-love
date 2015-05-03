@@ -58,7 +58,7 @@ namespace nersis {
 		virtual bool quit() {};
 		virtual void resize(int w, int h) {};
 		virtual void textInput(std::string text) {};
-		virtual void threadError(love::thread::LuaThread thread, std::string error) {};
+		virtual void threadError(love::thread::LuaThread *thread, std::string error) {};
 		virtual void visible(bool visibility) {};
 		
 		virtual void sdlEvent(SDL_Event e) {};

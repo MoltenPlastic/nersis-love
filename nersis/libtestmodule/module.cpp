@@ -41,7 +41,7 @@ void TestModule::keyPressed(love::keyboard::Keyboard::Key key, bool repeat) {
 	printf("Key pressed!\n");
 }
 
-LUALIB_API int luaopen_nersis_testmodule(lua_State *L) { //A message to module authors: Do not expect lua_State to be defined!
+LUALIB_API int luaopen_nersis_testmodule(lua_State *L) {
 	registerModule(new TestModule());
 	return 0;
 }
