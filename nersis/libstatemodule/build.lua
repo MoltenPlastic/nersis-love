@@ -1,6 +1,6 @@
 local cc = "gcc"
 local files = {"module.cpp"} --these need to be in a certain order
-local flags = {"-c","-fpic","-O2","-std=c++11","-I../liblove","-I../liblove/modules","-I../libnersiscore","-I/usr/include/SDL2","-I/usr/include/lua5.1"}
+local flags = {"-c","-fpic","-O2","-std=c++11","-I../liblove","-I../liblove/modules","-I../liblove/libraries","-I../libnersiscore","-I/usr/include/SDL2","-I/usr/include/lua5.1"}
 local out = "../statemodule.so"
 
 function printExec(cmdline)

@@ -3,6 +3,7 @@ local libs={
 	"nersis/libtestmodule",
 	"nersis/libfucklimitations",
 	"nersis/libstatemodule",
+	"nersis/libentitymodule",
 }
 
 function printExec(cmdline)
