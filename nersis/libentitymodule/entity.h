@@ -3,6 +3,7 @@
 #include "core.h"
 #include "physics/box2d/Physics.h"
 #include "graphics/opengl/Graphics.h"
+#include "physics/box2d/wrap_Body.h"
 #include "common/Module.h"
 #include <vector>
 
@@ -49,6 +50,28 @@ namespace nersis {
 			void destroy() {
 				
 			}
+			
+			int getId() {
+				return skeleton->id;
+			}
+			
+			std::string getName() {
+				return skeleton->name;
+			}
+			
+			int getLBody(lua_State *L) {
+				luax_pushtype(L, PHYSICS_BODY_ID, body);
+				return 1;
+			}
+			
+			int setLBody(lua_State *L) {
+				body = luax_checkbody(L, 1);
+				return 0;
+			}
+			
+			EntityContainer *getContainer() {
+				return container;
+			}
 		};
 		
 		class EntityContainer {
@@ -78,6 +101,8 @@ namespace nersis {
 						graphics->push();
 						graphics->translate((entity->renderX+entity->body->getX())/2.0,(entity->renderY+entity->body->getY())/2.0);
 						graphics->rotate((entity->renderAngle+entity->body->getAngle())/2.0);
+						//graphics->translate(entity->body->getX(),entity->body->getY());
+						//graphics->rotate(entity->body->getAngle());
 						entity->skeleton->draw->run(entity);
 						graphics->pop();
 					
@@ -90,6 +115,11 @@ namespace nersis {
 			
 			void addEntity(Entity *e) {
 				entities.push_back(e);
+			}
+			
+			int getLWorld(lua_State *L) {
+				luax_pushtype(L, PHYSICS_WORLD_ID, world);
+				return 1;
 			}
 		};
 		

@@ -1,5 +1,5 @@
 //implementation of a lua skeleton (this file is included in the middle of module.cpp)
-
+/*
 static void wrapEntity(lua_State *L, Entity *entity) {
 	Entity** pointer = (Entity**)lua_newuserdata(L, sizeof(Entity**));
 	*pointer = entity;
@@ -23,7 +23,7 @@ static void wrapEntityContainer(lua_State *L, EntityContainer *container) {
 static EntityContainer *unwrapEntityContainer(lua_State *L, int id) {
 	return *((EntityContainer**)luaL_checkudata(L, id, "Nersis_EC"));
 }
-
+*/
 class LuaEntityCallback : public EntityCallback {
 	lua_State *L;
 	int id;
@@ -40,12 +40,12 @@ class LuaEntityCallback : public EntityCallback {
 };
 
 void LuaEntityCallback::run(Entity *entity) {
-	lua_rawgeti(L, LUA_REGISTRYINDEX, id); /* table */
-	lua_getfield(L, -1, name); /* func table */
-	lua_remove(L, -2); /* func */
+	lua_rawgeti(L, LUA_REGISTRYINDEX, id);
+	lua_getfield(L, -1, name); 
+	lua_remove(L, -2);
 	if (lua_isfunction(L, -1)) {
-		wrapEntity(L, entity);
-		if (lua_pcall(L, 1, 0, 0) != 0) { /* error */
+		push(L, entity);
+		if (lua_pcall(L, 1, 0, 0) != 0) {
 			printf("Error in LuaState: %s\n",lua_tostring(L, -1));
 			lua_pop(L, 1);
 		}
@@ -56,7 +56,7 @@ void LuaEntityCallback::run(Entity *entity) {
 
 class LuaSkeleton : public Skeleton {
 	lua_State *L;
-	int id;
+	int ref;
 	
 	public:
 	LuaSkeleton(lua_State *L, int index);
@@ -65,18 +65,23 @@ class LuaSkeleton : public Skeleton {
 
 LuaSkeleton::LuaSkeleton(lua_State *L, int index) {
 	this->L = L;
-	id = luaL_ref(L, LUA_REGISTRYINDEX);
+	ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	
-	create = new LuaEntityCallback(L, id, "create");
-	update = new LuaEntityCallback(L, id, "update");
-	draw = new LuaEntityCallback(L, id, "draw");
-	destroy = new LuaEntityCallback(L, id, "destroy");
+	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_getfield(L, -1, "name");
+	name = lua_tostring(L, -1);
+	lua_pop(L, 2);
+	
+	create = new LuaEntityCallback(L, ref, "create");
+	update = new LuaEntityCallback(L, ref, "update");
+	draw = new LuaEntityCallback(L, ref, "draw");
+	destroy = new LuaEntityCallback(L, ref, "destroy");
 }
 
 LuaSkeleton::~LuaSkeleton() {
-	luaL_unref(L, LUA_REGISTRYINDEX, id);
+	luaL_unref(L, LUA_REGISTRYINDEX, ref);
 }
-
+/*
 static int nersis_entity_getId(lua_State *L) {
 	Entity *entity = unwrapEntity(L, 1);
 	lua_pushinteger(L, entity->skeleton->id);
@@ -101,13 +106,17 @@ static int nersis_entity_setBody(lua_State *L) {
 	return 0;
 }
 
+static int nersis_entity_getContainer(lua_State *L) {
+	Entity *entity = unwrapEntity(L, 1);
+	wrapEntityContainer(L, entity->container);
+	return 1;
+}
 static const luaL_Reg nersis_entity[] = {
 	{"getId", nersis_entity_getId},
 	{"getName", nersis_entity_getName},
 	{"getBody", nersis_entity_getBody},
 	{"setBody", nersis_entity_setBody},
-	//{"getContainer", nersis_entity_getContainer},
-	//{"setContainer", nersis_entity_setContainer},
+	{"getContainer", nersis_entity_getContainer},
 	{NULL,NULL}
 };
 
@@ -131,9 +140,16 @@ static int nersis_entitycontainer_draw(lua_State *L) {
 	return 0;
 }
 
+static int nersis_entitycontainer_getWorld(lua_State *L) {
+	EntityContainer *container = unwrapEntityContainer(L, 1);
+	luax_pushtype(L, PHYSICS_WORLD_ID, container->world);
+	return 1;
+}
+
 static const luaL_Reg nersis_entitycontainer[] = {
 	{"update", nersis_entitycontainer_update},
 	{"draw", nersis_entitycontainer_draw},
+	{"getWorld", nersis_entitycontainer_getWorld},
 	{NULL,NULL}
 };
 
@@ -143,4 +159,4 @@ void createEntityContainerMetatable(lua_State *L) {
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
 	lua_pop(L, 1);
-}
+}*/

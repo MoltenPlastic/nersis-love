@@ -1,5 +1,5 @@
 #include "entity.h"
-#include "physics/box2d/wrap_Body.h"
+#include <LuaBridge.h>
 #include "common/Module.h"
 #include <vector>
 #include <map>
@@ -8,6 +8,7 @@ using namespace love;
 using namespace love::graphics::opengl;
 using namespace love::physics::box2d;
 using namespace nersis;
+using namespace luabridge;
 
 namespace nersis {
 	namespace entity {
@@ -74,7 +75,7 @@ static int nersis_entity_registerSkeleton(lua_State *L) {
 	lua_pushinteger(L, nersis::entity::registerSkeleton(new nersis::entity::LuaSkeleton(L, 1)));
 	return 1;
 }
-
+/*
 static int nersis_entity_createEntityFromSkeleton(lua_State *L) {
 	nersis::entity::EntityContainer *ec = nersis::entity::unwrapEntityContainer(L, 1);
 	int e = luaL_checkinteger(L, 2);
@@ -100,12 +101,34 @@ static const luaL_Reg nersis_entitylib[] = {
 	{"findSkeletonByName", nersis_entity_findSkeletonByName},
 	{"newEntityContainer", nersis_entity_newEntityContainer},
 	{NULL, NULL}
-};
+};*/
 
 LUALIB_API int luaopen_nersis_entitymodule(lua_State *L) {
 	registerModule(new nersis::entity::EntityModule());
-	nersis::entity::createEntityContainerMetatable(L);
-	nersis::entity::createEntityMetatable(L);
-	luaL_register(L, "nersis.entity", nersis_entitylib);
-	return 1;
+	
+	getGlobalNamespace(L)
+		.beginNamespace("nersis")
+			.beginNamespace("entity")
+				.addCFunction("registerSkeleton", nersis_entity_registerSkeleton)
+				.addFunction("findSkeletonByName", nersis::entity::findSkeletonByName)
+				.addFunction("createEntityFromSkeleton", nersis::entity::createEntityFromSkeleton)
+				.beginClass<nersis::entity::Entity>("Entity")
+					.addFunction("getId", &nersis::entity::Entity::getId)
+					.addFunction("getName", &nersis::entity::Entity::getName)
+					.addCFunction("getBody", &nersis::entity::Entity::getLBody)
+					.addCFunction("setBody", &nersis::entity::Entity::setLBody)
+					.addFunction("getContainer", &nersis::entity::Entity::getContainer)
+				.endClass()
+				.beginClass<nersis::entity::EntityContainer>("EntityContainer")
+					.addConstructor <void (*) (void)> ()
+					.addFunction("update", &nersis::entity::EntityContainer::update)
+					.addFunction("draw", &nersis::entity::EntityContainer::draw)
+					.addFunction("getWorld", &nersis::entity::EntityContainer::getLWorld)
+				.endClass()
+			.endNamespace()
+		.endNamespace();
+	//nersis::entity::createEntityContainerMetatable(L);
+	//nersis::entity::createEntityMetatable(L);
+	//luaL_register(L, "nersis.entity", nersis_entitylib);
+	return 0;
 }
