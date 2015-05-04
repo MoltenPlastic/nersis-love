@@ -1,15 +1,18 @@
 #pragma once
 
 #include "core.h"
+#include <LuaBridge.h>
 #include "physics/box2d/Physics.h"
 #include "graphics/opengl/Graphics.h"
 #include "physics/box2d/wrap_Body.h"
 #include "common/Module.h"
 #include <vector>
+#include <map>
 
 using namespace love;
 using namespace love::physics::box2d;
 using namespace love::graphics::opengl;
+using namespace luabridge;
 
 namespace nersis {
 	namespace entity {
@@ -37,6 +40,7 @@ namespace nersis {
 			EntityContainer *container;
 			Body *body;
 			Skeleton *skeleton;
+			LuaRef data;
 			
 			// these are for interpolation
 			float renderX;
@@ -44,7 +48,6 @@ namespace nersis {
 			float renderAngle;
 			
 			Entity(EntityContainer *c, Skeleton *s);
-			
 			~Entity();
 			
 			void destroy() {
@@ -69,6 +72,11 @@ namespace nersis {
 				return 0;
 			}
 			
+			int getLData(lua_State *L) {
+				data.push(L);
+				return 1;
+			}
+			
 			EntityContainer *getContainer() {
 				return container;
 			}
@@ -76,12 +84,13 @@ namespace nersis {
 		
 		class EntityContainer {
 			public:
+			lua_State *L;
 			World *world;
 			std::vector<Entity*> entities;
 			int simulationSteps = 0; // track simulation steps
 			int renderSteps = 0; // track rendered steps
 			
-			EntityContainer();
+			EntityContainer(lua_State *L);
 			~EntityContainer();
 			
 			void update() {

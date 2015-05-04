@@ -36,7 +36,7 @@ local spinner = nersis.entity.registerSkeleton {
 		love.graphics.rectangle("fill", -64, -4, 128, 8)
 	end,
 	update = function(entity)
-		entity:getBody():applyAngularImpulse(1000)
+		entity:getBody():applyAngularImpulse(entity:getData()["speed"])
 	end
 }
 local boxcontainer = nersis.entity.registerSkeleton {
@@ -63,6 +63,7 @@ local boxcontainer = nersis.entity.registerSkeleton {
 local ball1 = nersis.entity.createEntityFromSkeleton(container, ball)
 local ball2 = nersis.entity.createEntityFromSkeleton(container, ball)
 local spinner = nersis.entity.createEntityFromSkeleton(container, spinner)
+spinner:getData()["speed"] = 10
 local boxcontainer = nersis.entity.createEntityFromSkeleton(container, boxcontainer)
 
 states.push { --prove you can still do things from the lua side...

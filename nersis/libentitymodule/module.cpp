@@ -2,6 +2,7 @@
 #include <LuaBridge.h>
 #include "common/Module.h"
 #include <vector>
+#include <iostream>
 #include <map>
 
 using namespace love;
@@ -12,7 +13,7 @@ using namespace luabridge;
 
 namespace nersis {
 	namespace entity {
-		Entity::Entity(EntityContainer *c, Skeleton *s) {
+		Entity::Entity(EntityContainer *c, Skeleton *s) : data(LuaRef::newTable(c->L)) {
 			container = c;
 			Physics *physics = Module::getInstance<Physics>(Module::M_PHYSICS);
 			body = physics->newBody(container->world, 0, 0, Body::BODY_DYNAMIC);
@@ -28,7 +29,8 @@ namespace nersis {
 			body->destroy();
 		}
 		
-		EntityContainer::EntityContainer() {
+		EntityContainer::EntityContainer(lua_State *L) {
+			this->L = L;
 			Physics *physics = Module::getInstance<Physics>(Module::M_PHYSICS);
 			world = physics->newWorld(0, 0, true);
 		}
@@ -75,6 +77,13 @@ static int nersis_entity_registerSkeleton(lua_State *L) {
 	lua_pushinteger(L, nersis::entity::registerSkeleton(new nersis::entity::LuaSkeleton(L, 1)));
 	return 1;
 }
+
+static int nersis_entity_newEntityContainer(lua_State *L) {
+	nersis::entity::EntityContainer *ec = new nersis::entity::EntityContainer(L);
+	push(L, ec);
+	return 1;
+}
+
 /*
 static int nersis_entity_createEntityFromSkeleton(lua_State *L) {
 	nersis::entity::EntityContainer *ec = nersis::entity::unwrapEntityContainer(L, 1);
@@ -86,12 +95,6 @@ static int nersis_entity_createEntityFromSkeleton(lua_State *L) {
 
 static int nersis_entity_findSkeletonByName(lua_State *L) {
 	lua_pushinteger(L, nersis::entity::findSkeletonByName(luaL_checkstring(L, 1)));
-	return 1;
-}
-
-static int nersis_entity_newEntityContainer(lua_State *L) {
-	nersis::entity::EntityContainer *ec = new nersis::entity::EntityContainer();
-	nersis::entity::wrapEntityContainer(L, ec);
 	return 1;
 }
 
@@ -117,10 +120,11 @@ LUALIB_API int luaopen_nersis_entitymodule(lua_State *L) {
 					.addFunction("getName", &nersis::entity::Entity::getName)
 					.addCFunction("getBody", &nersis::entity::Entity::getLBody)
 					.addCFunction("setBody", &nersis::entity::Entity::setLBody)
+					.addCFunction("getData", &nersis::entity::Entity::getLData)
 					.addFunction("getContainer", &nersis::entity::Entity::getContainer)
 				.endClass()
 				.beginClass<nersis::entity::EntityContainer>("EntityContainer")
-					.addConstructor <void (*) (void)> ()
+					.addStaticCFunction("__call", nersis_entity_newEntityContainer)
 					.addFunction("update", &nersis::entity::EntityContainer::update)
 					.addFunction("draw", &nersis::entity::EntityContainer::draw)
 					.addFunction("getWorld", &nersis::entity::EntityContainer::getLWorld)

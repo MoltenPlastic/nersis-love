@@ -26,12 +26,12 @@ static EntityContainer *unwrapEntityContainer(lua_State *L, int id) {
 */
 class LuaEntityCallback : public EntityCallback {
 	lua_State *L;
-	int id;
+	LuaRef ref;
 	const char *name;
 	
 	public:
-	LuaEntityCallback(lua_State *L, int id, const char *name) {
-		this->id = id;
+	LuaEntityCallback(lua_State *L, LuaRef ref, const char *name) : ref(ref) {
+		//this->ref = ref;
 		this->L = L;
 		this->name = name;
 	}
@@ -40,37 +40,29 @@ class LuaEntityCallback : public EntityCallback {
 };
 
 void LuaEntityCallback::run(Entity *entity) {
-	lua_rawgeti(L, LUA_REGISTRYINDEX, id);
-	lua_getfield(L, -1, name); 
-	lua_remove(L, -2);
-	if (lua_isfunction(L, -1)) {
-		push(L, entity);
-		if (lua_pcall(L, 1, 0, 0) != 0) {
-			printf("Error in LuaState: %s\n",lua_tostring(L, -1));
-			lua_pop(L, 1);
+	LuaRef func = ref[name];
+	if (func.isFunction()) {
+		try {
+			func(entity);
+		} catch (LuaException const& e) {
+			std::cerr && e.what ();
 		}
-	} else {
-		lua_pop(L, 1);
 	}
 }
 
 class LuaSkeleton : public Skeleton {
 	lua_State *L;
-	int ref;
+	LuaRef ref;
 	
 	public:
 	LuaSkeleton(lua_State *L, int index);
 	virtual ~LuaSkeleton();
 };
 
-LuaSkeleton::LuaSkeleton(lua_State *L, int index) {
+LuaSkeleton::LuaSkeleton(lua_State *L, int index) : ref(LuaRef::fromStack(L, index)) {
 	this->L = L;
-	ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-	lua_getfield(L, -1, "name");
-	name = lua_tostring(L, -1);
-	lua_pop(L, 2);
+	name = ref["name"].cast<std::string>();
 	
 	create = new LuaEntityCallback(L, ref, "create");
 	update = new LuaEntityCallback(L, ref, "update");
@@ -79,7 +71,7 @@ LuaSkeleton::LuaSkeleton(lua_State *L, int index) {
 }
 
 LuaSkeleton::~LuaSkeleton() {
-	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	//luaL_unref(L, LUA_REGISTRYINDEX, ref);
 }
 /*
 static int nersis_entity_getId(lua_State *L) {
