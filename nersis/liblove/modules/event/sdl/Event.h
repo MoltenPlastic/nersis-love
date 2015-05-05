@@ -23,6 +23,8 @@
 
 // LOVE
 #include "event/Event.h"
+#include "common/runtime.h"
+#include "common/EnumMap.h"
 
 // SDL
 #include <SDL_events.h>
@@ -66,7 +68,7 @@ public:
 	 */
 	void clear();
 
-//private: I need to use these
+//private:
 
 	Message *convert(const SDL_Event &e) const;
 	Message *convertJoystickEvent(const SDL_Event &e) const;
@@ -74,6 +76,9 @@ public:
 
 	static std::map<SDL_Keycode, love::keyboard::Keyboard::Key> createKeyMap();
 	static std::map<SDL_Keycode, love::keyboard::Keyboard::Key> keys;
+
+	static EnumMap<love::mouse::Mouse::Button, Uint8, love::mouse::Mouse::BUTTON_MAX_ENUM>::Entry buttonEntries[];
+	static EnumMap<love::mouse::Mouse::Button, Uint8, love::mouse::Mouse::BUTTON_MAX_ENUM> buttons;
 
 }; // Event
 

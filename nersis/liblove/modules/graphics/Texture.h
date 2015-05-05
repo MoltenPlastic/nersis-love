@@ -58,16 +58,18 @@ public:
 
 	struct Filter
 	{
-		FilterMode min    = FILTER_LINEAR;
-		FilterMode mag    = FILTER_LINEAR;
-		FilterMode mipmap = FILTER_NONE;
-		float anisotropy  = 1.0f;
+		Filter();
+		FilterMode min;
+		FilterMode mag;
+		FilterMode mipmap;
+		float anisotropy;
 	};
 
 	struct Wrap
 	{
-		WrapMode s = WRAP_CLAMP;
-		WrapMode t = WRAP_CLAMP;
+		Wrap();
+		WrapMode s;
+		WrapMode t;
 	};
 
 	Texture();
@@ -95,18 +97,14 @@ public:
 	virtual void setFilter(const Filter &f) = 0;
 	virtual const Filter &getFilter() const;
 
-	virtual bool setWrap(const Wrap &w) = 0;
+	virtual void setWrap(const Wrap &w) = 0;
 	virtual const Wrap &getWrap() const;
 
 	virtual const Vertex *getVertices() const;
 
-	virtual const void *getHandle() const = 0;
-
 	// The default filter.
 	static void setDefaultFilter(const Filter &f);
 	static const Filter &getDefaultFilter();
-
-	static bool validateFilter(const Filter &f, bool mipmapsAllowed);
 
 	static bool getConstant(const char *in, FilterMode &out);
 	static bool getConstant(FilterMode in, const char  *&out);

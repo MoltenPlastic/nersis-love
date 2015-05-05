@@ -1,7 +1,19 @@
-local cc = "gcc"
+local buildconfig = dofile("../buildconfig.lua")
+local buildarch = ... or "linux_x64"
+local build = buildconfig.buildoptions[buildarch]
+
+local cc = build.cc
 local files = {"dummy.cpp"} --these need to be in a certain order
-local flags = {"-c","-fpic","-O2","-std=c++11","-I../liblove","-I../liblove/modules","-I../liblove/libraries","-I../libnersiscore","-I/usr/include/SDL2","-I/usr/include/lua5.1"}
-local out = "../fucklimitations.so"
+local flags = build.flags
+for i, v in pairs(buildconfig.includes) do
+	flags[#flags+1] = "-I"..v
+end
+
+for i, v in pairs(build.includes or {}) do
+	flags[#flags+1] = "-I"..v
+end
+
+local out = "../fucklimitations-"..buildarch..build.ending
 
 function printExec(cmdline)
 	print("> "..cmdline)
@@ -14,7 +26,7 @@ function printExec(cmdline)
 end
 
 for i, file in pairs(files) do
-	printExec(cc.." "..table.concat(flags," ").." "..file.." -o "..file:gsub("%.cpp",".o"))
+	printExec(cc.." -c "..table.concat(flags," ").." "..file.." -o "..file:gsub("%.cpp",".o"))
 end
 
-printExec(cc.." -shared -fpic -o "..out.." "..table.concat(files," "):gsub("%.cpp",".o"))
+printExec(cc.." -shared "..table.concat(flags," ").." -o "..out.." "..table.concat(files," "):gsub("%.cpp",".o"))

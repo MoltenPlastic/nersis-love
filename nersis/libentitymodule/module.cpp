@@ -13,10 +13,10 @@ using namespace luabridge;
 
 namespace nersis {
 	namespace entity {
-		Entity::Entity(EntityContainer *c, Skeleton *s) : data(LuaRef::newTable(c->L)) {
+		Entity::Entity(EntityContainer *c, Skeleton *s, float x, float y) : data(LuaRef::newTable(c->L)) {
 			container = c;
 			Physics *physics = Module::getInstance<Physics>(Module::M_PHYSICS);
-			body = physics->newBody(container->world, 0, 0, Body::BODY_DYNAMIC);
+			body = physics->newBody(container->world, x, y, Body::BODY_DYNAMIC);
 			container->addEntity(this);
 			skeleton = s;
 			if (skeleton->create)
@@ -32,7 +32,7 @@ namespace nersis {
 		EntityContainer::EntityContainer(lua_State *L) {
 			this->L = L;
 			Physics *physics = Module::getInstance<Physics>(Module::M_PHYSICS);
-			world = physics->newWorld(0, 0, true);
+			world = physics->newWorld(0, 1, true);
 		}
 		
 		EntityContainer::~EntityContainer() {
@@ -50,9 +50,9 @@ namespace nersis {
 			return id;
 		}
 		
-		Entity *createEntityFromSkeleton(EntityContainer *container, int id) {
+		Entity *createEntityFromSkeleton(EntityContainer *container, int id, float x, float y) {
 			Skeleton *skel = skeletons[id];
-			return new Entity(container, skel);
+			return new Entity(container, skel, x, y);
 		}
 		
 		int findSkeletonByName(std::string name) {

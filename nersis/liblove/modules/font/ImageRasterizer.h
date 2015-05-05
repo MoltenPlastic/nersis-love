@@ -39,7 +39,7 @@ namespace font
 class ImageRasterizer : public Rasterizer
 {
 public:
-	ImageRasterizer(love::image::ImageData *imageData, uint32 *glyphs, int numglyphs, int extraspacing);
+	ImageRasterizer(love::image::ImageData *imageData, uint32 *glyphs, int numglyphs);
 	virtual ~ImageRasterizer();
 
 	// Implement Rasterizer
@@ -49,14 +49,6 @@ public:
 	virtual bool hasGlyph(uint32 glyph) const;
 
 private:
-
-	// Information about a glyph in the ImageData
-	struct ImageGlyphData
-	{
-		int x;
-		int width;
-	};
-
 	// Load all the glyph positions into memory
 	void load();
 
@@ -69,7 +61,13 @@ private:
 	// Number of glyphs in the font
 	int numglyphs;
 
-	int extraSpacing;
+	// Information about a glyph in the ImageData
+	struct ImageGlyphData
+	{
+		int x;
+		int width;
+		int spacing;
+	};
 
 	std::map<uint32, ImageGlyphData> imageGlyphs;
 

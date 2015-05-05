@@ -30,31 +30,27 @@
 #include "joystick/Joystick.h"
 #include "thread/threads.h"
 
-// C++
+// STL
 #include <queue>
-#include <vector>
 
 namespace love
 {
 namespace event
 {
-
 class Message : public Object
 {
-public:
+private:
+	std::string name;
+	Variant *args[4];
+	int nargs;
 
-	Message(const std::string &name, const std::vector<StrongRef<Variant>> &vargs = {});
+public:
+	Message(const std::string &name, Variant *a = NULL, Variant *b = NULL, Variant *c = NULL, Variant *d = NULL);
 	~Message();
 
 	int toLua(lua_State *L);
 	static Message *fromLua(lua_State *L, int n);
-
-private:
-
-	std::string name;
-	std::vector<StrongRef<Variant>> args;
-
-}; // Message
+};
 
 class Event : public Module
 {
@@ -70,7 +66,6 @@ public:
 	virtual void clear();
 
 	virtual void pump() = 0;
-	virtual Message *wait() = 0;
 
 protected:
 	thread::Mutex *mutex;

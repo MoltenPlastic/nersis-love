@@ -49,10 +49,10 @@ public:
 	 **/
 	enum Mode
 	{
-		MODE_CLOSED,
-		MODE_READ,
-		MODE_WRITE,
-		MODE_APPEND,
+		CLOSED,
+		READ,
+		WRITE,
+		APPEND,
 		MODE_MAX_ENUM
 	};
 
@@ -77,7 +77,7 @@ public:
 	/**
 	 * Opens the file in a certain mode.
 	 *
-	 * @param mode MODE_READ, MODE_WRITE, MODE_APPEND.
+	 * @param mode READ, WRITE, APPEND.
 	 * @return True if successful, false otherwise.
 	 **/
 	virtual bool open(Mode mode) = 0;
@@ -107,7 +107,7 @@ public:
 	 * @param size The number of bytes to attempt reading, or -1 for EOF.
 	 * @return A newly allocated Data object.
 	 **/
-	virtual FileData *read(int64 size = ALL);
+	virtual FileData *read(int64 size = ALL) = 0;
 
 	/**
 	 * Reads data into the destination buffer.
@@ -134,7 +134,7 @@ public:
 	 * @param size The number of bytes to attempt writing, or -1 for everything.
 	 * @return True of success, false otherwise.
 	 **/
-	virtual bool write(const Data *data, int64 size = ALL);
+	virtual bool write(const Data *data, int64 size = ALL) = 0;
 
 	/**
 	 * Flushes the currently buffered file data to disk. Only applicable in
@@ -147,7 +147,7 @@ public:
 	 *
 	 * @return True if EOF, false otherwise.
 	 **/
-	virtual bool isEOF() = 0;
+	virtual bool eof() = 0;
 
 	/**
 	 * Gets the current position in the File.
@@ -192,13 +192,13 @@ public:
 	 * Gets the filename for this File, or empty string if none.
 	 * @return The filename for this File.
 	 **/
-	virtual const std::string &getFilename() const = 0;
+	virtual std::string getFilename() const = 0;
 
 	/**
 	 * Gets the file extension for this File, or empty string if none.
 	 * @return The file extension for this File (without the dot).
 	 **/
-	virtual std::string getExtension() const;
+	virtual std::string getExtension() const = 0;
 
 	static bool getConstant(const char *in, Mode &out);
 	static bool getConstant(Mode in, const char *&out);

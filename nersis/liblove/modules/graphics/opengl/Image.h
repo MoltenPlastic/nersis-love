@@ -28,9 +28,8 @@
 #include "common/StringMap.h"
 #include "common/math.h"
 #include "image/ImageData.h"
-#include "image/CompressedImageData.h"
-#include "graphics/Texture.h"
-#include "graphics/Volatile.h"
+#include "image/CompressedData.h"
+#include "Texture.h"
 
 // OpenGL
 #include "OpenGL.h"
@@ -48,21 +47,15 @@ namespace opengl
  *
  * @author Anders Ruud
  **/
-class Image : public Texture, public Volatile
+class Image : public Texture
 {
 public:
 
-	enum FlagType
+	enum Format
 	{
-		FLAG_TYPE_MIPMAPS,
-		FLAG_TYPE_SRGB,
-		FLAG_TYPE_MAX_ENUM
-	};
-
-	struct Flags
-	{
-		bool mipmaps = false;
-		bool sRGB = false;;
+		FORMAT_NORMAL,
+		FORMAT_SRGB,
+		FORMAT_MAX_ENUM
 	};
 
 	/**
@@ -71,20 +64,22 @@ public:
 	 *
 	 * @param data The data from which to load the image.
 	 **/
-	Image(love::image::ImageData *data, const Flags &flags);
+	Image(love::image::ImageData *data, Format format = FORMAT_NORMAL);
 
 	/**
 	 * Creates a new Image with compressed image data.
 	 *
 	 * @param cdata The compressed data from which to load the image.
 	 **/
-	Image(love::image::CompressedImageData *cdata, const Flags &flags);
+	Image(love::image::CompressedData *cdata, Format format = FORMAT_NORMAL);
 
+	/**
+	 * Destructor. Deletes the hardware texture and other resources.
+	 **/
 	virtual ~Image();
 
-	// Implements Volatile.
-	bool loadVolatile();
-	void unloadVolatile();
+	love::image::ImageData *getImageData() const;
+	love::image::CompressedData *getCompressedData() const;
 
 	/**
 	 * @copydoc Drawable::draw()
@@ -96,56 +91,70 @@ public:
 	 **/
 	void drawq(Quad *quad, float x, float y, float angle, float sx, float sy, float ox, float oy, float kx, float ky);
 
-	virtual const void *getHandle() const;
+	/**
+	 * Call before using this Image's texture to draw. Binds the texture,
+	 * globally scales texture coordinates if the Image has NPOT dimensions and
+	 * NPOT isn't supported, etc.
+	 **/
+	virtual void predraw();
+	virtual void postdraw();
 
-	love::image::ImageData *getImageData() const;
-	love::image::CompressedImageData *getCompressedData() const;
+	virtual GLuint getGLTexture() const;
 
 	virtual void setFilter(const Texture::Filter &f);
-	virtual bool setWrap(const Texture::Wrap &w);
+	virtual void setWrap(const Texture::Wrap &w);
 
 	void setMipmapSharpness(float sharpness);
 	float getMipmapSharpness() const;
 
 	/**
-	 * Whether this Image is using a compressed texture (via CompressedImageData).
+	 * Whether this Image is using a compressed texture (via CompressedData).
 	 **/
 	bool isCompressed() const;
 
-	/**
-	 * Re-uploads the ImageData or CompressedImageData associated with this Image to
-	 * the GPU.
-	 **/
-	bool refresh(int xoffset, int yoffset, int w, int h);
+	void bind() const;
 
-	const Flags &getFlags() const;
+	bool load();
+	void unload();
+
+	// Implements Volatile.
+	bool loadVolatile();
+	void unloadVolatile();
+
+	/**
+	 * Re-uploads the ImageData or CompressedData associated with this Image to
+	 * the GPU, allowing situations where lovers modify an ImageData after image
+	 * creation from the ImageData, and apply the changes with Image:refresh().
+	 **/
+	bool refresh();
+
+	Format getFormat() const;
 
 	static void setDefaultMipmapSharpness(float sharpness);
 	static float getDefaultMipmapSharpness();
 	static void setDefaultMipmapFilter(FilterMode f);
 	static FilterMode getDefaultMipmapFilter();
 
+	static bool hasNpot();
 	static bool hasAnisotropicFilteringSupport();
-	static bool hasCompressedTextureSupport(image::CompressedImageData::Format format, bool sRGB);
+	static bool hasMipmapSupport();
+	static bool hasMipmapSharpnessSupport();
+
+	static bool hasCompressedTextureSupport();
+	static bool hasCompressedTextureSupport(image::CompressedData::Format format);
+
 	static bool hasSRGBSupport();
 
-	static bool getConstant(const char *in, FlagType &out);
-	static bool getConstant(FlagType in, const char *&out);
+	static bool getConstant(const char *in, Format &out);
+	static bool getConstant(Format in, const char *&out);
 
 	static int imageCount;
 
 private:
 
+	void uploadDefaultTexture();
+
 	void drawv(const Matrix &t, const Vertex *v);
-
-	void preload();
-
-	void generateMipmaps();
-	void loadDefaultTexture();
-	void loadFromCompressedData();
-	void loadFromImageData();
-
-	GLenum getCompressedFormat(image::CompressedImageData::Format cformat) const;
 
 	// The ImageData from which the texture is created. May be null if
 	// Compressed image data was used to create the texture.
@@ -153,7 +162,10 @@ private:
 
 	// Or the Compressed Image Data from which the texture is created. May be
 	// null if raw ImageData was used to create the texture.
-	StrongRef<love::image::CompressedImageData> cdata;
+	StrongRef<love::image::CompressedData> cdata;
+
+	// Real dimensions of the texture, if it was auto-padded to POT size.
+	int paddedWidth, paddedHeight;
 
 	// OpenGL texture identifier.
 	GLuint texture;
@@ -161,11 +173,14 @@ private:
 	// Mipmap texture LOD bias (sharpness) value.
 	float mipmapSharpness;
 
+	// True if mipmaps have been created for this Image.
+	bool mipmapsCreated;
+
 	// Whether this Image is using a compressed texture.
 	bool compressed;
 
-	// The flags used to initialize this Image.
-	Flags flags;
+	// The format to interpret the image's data as.
+	Format format;
 
 	// True if the image wasn't able to be properly created and it had to fall
 	// back to a default texture.
@@ -173,13 +188,24 @@ private:
 
 	size_t textureMemorySize;
 
+	void preload();
+
+	void uploadTexturePadded();
+	void uploadTexture();
+
+	void uploadCompressedMipmaps();
+	void createMipmaps();
+	void checkMipmapsCreated();
+
 	static float maxMipmapSharpness;
 
 	static FilterMode defaultMipmapFilter;
 	static float defaultMipmapSharpness;
 
-	static StringMap<FlagType, FLAG_TYPE_MAX_ENUM>::Entry flagNameEntries[];
-	static StringMap<FlagType, FLAG_TYPE_MAX_ENUM> flagNames;
+	GLenum getCompressedFormat(image::CompressedData::Format cformat) const;
+
+	static StringMap<Format, FORMAT_MAX_ENUM>::Entry formatEntries[];
+	static StringMap<Format, FORMAT_MAX_ENUM> formats;
 
 }; // Image
 

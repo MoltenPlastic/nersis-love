@@ -49,6 +49,7 @@ public:
 		SETTING_FULLSCREEN,
 		SETTING_FULLSCREEN_TYPE,
 		SETTING_VSYNC,
+		SETTING_FSAA, // For backward-compatibility. TODO: remove!
 		SETTING_MSAA,
 		SETTING_RESIZABLE,
 		SETTING_MIN_WIDTH,
@@ -66,9 +67,9 @@ public:
 
 	enum FullscreenType
 	{
-		FULLSCREEN_EXCLUSIVE,
-		FULLSCREEN_DESKTOP,
-		FULLSCREEN_MAX_ENUM
+		FULLSCREEN_TYPE_NORMAL,
+		FULLSCREEN_TYPE_DESKTOP,
+		FULLSCREEN_TYPE_MAX_ENUM
 	};
 
 	enum MessageBoxType
@@ -115,13 +116,16 @@ public:
 	virtual bool setFullscreen(bool fullscreen, FullscreenType fstype) = 0;
 	virtual bool setFullscreen(bool fullscreen) = 0;
 
-	virtual bool onSizeChanged(int width, int height) = 0;
+	virtual bool onWindowResize(int width, int height) = 0;
 
 	virtual int getDisplayCount() const = 0;
 
 	virtual const char *getDisplayName(int displayindex) const = 0;
 
 	virtual std::vector<WindowSize> getFullscreenSizes(int displayindex) const = 0;
+
+	virtual int getWidth() const = 0;
+	virtual int getHeight() const = 0;
 
 	virtual void getDesktopDimensions(int displayindex, int &width, int &height) const = 0;
 
@@ -153,12 +157,6 @@ public:
 	virtual void setMouseGrab(bool grab) = 0;
 	virtual bool isMouseGrabbed() const = 0;
 
-	virtual void getPixelDimensions(int &w, int &h) const = 0;
-	// Note: window-space coordinates are not necessarily the same as
-	// density-independent units (which toPixels and fromPixels use.)
-	virtual void windowToPixelCoords(double *x, double *y) const = 0;
-	virtual void pixelToWindowCoords(double *x, double *y) const = 0;
-
 	virtual double getPixelScale() const = 0;
 
 	virtual double toPixels(double x) const = 0;
@@ -172,7 +170,8 @@ public:
 	virtual int showMessageBox(const MessageBoxData &data) = 0;
 
 	//virtual static Window *createSingleton() = 0;
-	// No virtual statics, of course, but you are supposed to implement this static.
+	//virtual static Window *getSingleton() = 0;
+	// No virtual statics, of course, but you are supposed to implement these statics.
 
 	static bool getConstant(const char *in, Setting &out);
 	static bool getConstant(Setting in, const char *&out);
@@ -183,7 +182,7 @@ public:
 	static bool getConstant(const char *in, MessageBoxType &out);
 	static bool getConstant(MessageBoxType in, const char *&out);
 
-//protected: HEHE
+protected:
 
 	static Window *singleton;
 
@@ -192,8 +191,8 @@ private:
 	static StringMap<Setting, SETTING_MAX_ENUM>::Entry settingEntries[];
 	static StringMap<Setting, SETTING_MAX_ENUM> settings;
 
-	static StringMap<FullscreenType, FULLSCREEN_MAX_ENUM>::Entry fullscreenTypeEntries[];
-	static StringMap<FullscreenType, FULLSCREEN_MAX_ENUM> fullscreenTypes;
+	static StringMap<FullscreenType, FULLSCREEN_TYPE_MAX_ENUM>::Entry fullscreenTypeEntries[];
+	static StringMap<FullscreenType, FULLSCREEN_TYPE_MAX_ENUM> fullscreenTypes;
 
 	static StringMap<MessageBoxType, MESSAGEBOX_MAX_ENUM>::Entry messageBoxTypeEntries[];
 	static StringMap<MessageBoxType, MESSAGEBOX_MAX_ENUM> messageBoxTypes;
@@ -202,23 +201,26 @@ private:
 
 struct WindowSettings
 {
-	bool fullscreen = false;
-	Window::FullscreenType fstype = Window::FULLSCREEN_DESKTOP;
-	bool vsync = true;
-	int msaa = 0;
-	bool resizable = false;
-	int minwidth = 1;
-	int minheight = 1;
-	bool borderless = false;
-	bool centered = true;
-	int display = 0;
-	bool highdpi = false;
-	bool sRGB = false;
-	double refreshrate = 0.0;
-	bool useposition = false;
-	int x = 0;
-	int y = 0;
-};
+	WindowSettings();
+
+	bool fullscreen; // = false
+	Window::FullscreenType fstype; // = FULLSCREEN_TYPE_NORMAL
+	bool vsync; // = true
+	int msaa; // = 0
+	bool resizable; // = false
+	int minwidth; // = 1
+	int minheight; // = 1
+	bool borderless; // = false
+	bool centered; // = true
+	int display; // = 0
+	bool highdpi; // false
+	bool sRGB; // false
+	double refreshrate; // 0.0
+	bool useposition; // false
+	int x; // 0
+	int y; // 0
+
+}; // WindowSettings
 
 } // window
 } // love

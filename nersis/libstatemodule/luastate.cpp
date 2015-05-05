@@ -252,7 +252,7 @@ class LuaState : public State {
 		lua_getfield(L, -1, "threaderror"); /* func table */
 		lua_remove(L, -2); /* func */
 		if (lua_isfunction(L, -1)) {
-			luax_pushtype(L, THREAD_THREAD_ID, thread);
+			luax_pushtype(L, "Thread", THREAD_THREAD_ID, thread);
 			lua_pushstring(L, error.c_str());
 			if (lua_pcall(L, 2, 0, 0) != 0) { /* error */
 				printf("Error in LuaState: %s\n",lua_tostring(L, 1));

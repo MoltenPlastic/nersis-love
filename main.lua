@@ -15,13 +15,23 @@ local ball = nersis.entity.registerSkeleton {
 		local body = entity:getBody()
 		local circle = love.physics.newCircleShape(16)
 		local fixture = love.physics.newFixture(body, circle)
-		body:setPosition(256,y)
-		y = y+64
 	end,
 	draw = function(entity)
 		love.graphics.circle("fill", 0, 0, 16)
 	end,
 }
+--[[local box = nersis.entity.registerSkeleton {
+	name = "box",
+	create = function(entity)
+		print("create box!")
+		local body = entity:getBody()
+		local box = love.physics.newRectangleShape(16,16)
+		local fixture = love.physics.newFixture(body, box)
+	end,
+	draw = function(entity)
+		love.graphics.rectangle("fill", -8, -8, 16, 16)
+	end,
+}]]
 local spinner = nersis.entity.registerSkeleton {
 	name = "spinner",
 	create = function(entity)
@@ -29,7 +39,6 @@ local spinner = nersis.entity.registerSkeleton {
 		local body = entity:getBody()
 		local rectangle = love.physics.newRectangleShape(128,8)
 		local fixture = love.physics.newFixture(body, rectangle)
-		body:setPosition(256,128+32+4)
 		local mousejoint = love.physics.newMouseJoint(body, 256,128+32+4)
 	end,
 	draw = function(entity)
@@ -52,19 +61,19 @@ local boxcontainer = nersis.entity.registerSkeleton {
 		local fixture3 = love.physics.newFixture(body, edge3)
 		local edge4 = love.physics.newEdgeShape(0,256,0,0)
 		local fixture4 = love.physics.newFixture(body, edge4)
-		body:setPosition(128,128)
 		--body:setType("static")
+		body:setBullet(true)
 	end,
 	draw = function(entity)
 		love.graphics.rectangle("line", 0, 0, 256, 256)
 	end
 }
 
-local ball1 = nersis.entity.createEntityFromSkeleton(container, ball)
-local ball2 = nersis.entity.createEntityFromSkeleton(container, ball)
-local spinner = nersis.entity.createEntityFromSkeleton(container, spinner)
-spinner:getData()["speed"] = 10
-local boxcontainer = nersis.entity.createEntityFromSkeleton(container, boxcontainer)
+local ball1 = nersis.entity.createEntityFromSkeleton(container, ball, 256, y)
+local ball2 = nersis.entity.createEntityFromSkeleton(container, ball, 256, y+64)
+local spinner = nersis.entity.createEntityFromSkeleton(container, spinner, 256, 128+32+4)
+spinner:getData()["speed"] = 100
+local boxcontainer = nersis.entity.createEntityFromSkeleton(container, boxcontainer, 128, 128)
 
 states.push { --prove you can still do things from the lua side...
 	draw = function()
@@ -72,9 +81,13 @@ states.push { --prove you can still do things from the lua side...
 		container:draw()
 	end,
 	update = function(dt)
-		container:update()
+		container:update(dt)
 	end,
 	keypressed = function(key)
 		print(key.."!")
+		if key == " " then
+			local sd = spinner:getData()
+			sd.speed = sd.speed*10
+		end
 	end,
 }

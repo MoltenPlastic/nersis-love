@@ -22,10 +22,10 @@
 #define LOVE_FONT_FREETYPE_TRUE_TYPE_RASTERIZER_H
 
 // LOVE
-#include "filesystem/FileData.h"
-#include "font/TrueTypeRasterizer.h"
+#include "filesystem/File.h"
+#include "font/Rasterizer.h"
 
-// FreeType2
+// TrueType2
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
@@ -40,11 +40,10 @@ namespace freetype
 /**
  * Holds data for a font object.
  **/
-class TrueTypeRasterizer : public love::font::TrueTypeRasterizer
+class TrueTypeRasterizer : public Rasterizer
 {
 public:
-
-	TrueTypeRasterizer(FT_Library library, love::Data *data, int size, Hinting hinting);
+	TrueTypeRasterizer(FT_Library library, Data *data, int size);
 	virtual ~TrueTypeRasterizer();
 
 	// Implement Rasterizer
@@ -53,21 +52,14 @@ public:
 	virtual int getGlyphCount() const;
 	virtual bool hasGlyph(uint32 glyph) const;
 
-	static bool accepts(FT_Library library, love::Data *data);
-
 private:
-
-	static FT_ULong hintingToLoadOption(Hinting hinting);
 
 	// TrueType face
 	FT_Face face;
 
-	// Font data
-	StrongRef<love::Data> data;
-
-	Hinting hinting;
-
-}; // TrueTypeRasterizer
+	// File data
+	StrongRef<Data> data;
+}; // FreetypeRasterizer
 
 } // freetype
 } // font

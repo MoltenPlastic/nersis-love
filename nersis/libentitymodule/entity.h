@@ -47,7 +47,7 @@ namespace nersis {
 			float renderY;
 			float renderAngle;
 			
-			Entity(EntityContainer *c, Skeleton *s);
+			Entity(EntityContainer *c, Skeleton *s, float x, float y);
 			~Entity();
 			
 			void destroy() {
@@ -63,7 +63,7 @@ namespace nersis {
 			}
 			
 			int getLBody(lua_State *L) {
-				luax_pushtype(L, PHYSICS_BODY_ID, body);
+				luax_pushtype(L, "Body", PHYSICS_BODY_T, body);
 				return 1;
 			}
 			
@@ -89,18 +89,24 @@ namespace nersis {
 			std::vector<Entity*> entities;
 			int simulationSteps = 0; // track simulation steps
 			int renderSteps = 0; // track rendered steps
+			float timeSinceLastSimulationTick = 0;
 			
 			EntityContainer(lua_State *L);
 			~EntityContainer();
 			
-			void update() {
+			void update(float dt) {
 				//update world at constant rate
-				world->update(1.0/30.0);
-				for (auto entity : entities) {
-					if (entity->skeleton->update)
-						entity->skeleton->update->run(entity);
+				timeSinceLastSimulationTick += dt;
+				
+				if (timeSinceLastSimulationTick >= 1.0/30.0) {
+					timeSinceLastSimulationTick -= 1.0/30.0;
+					world->update(1.0/30.0);
+					for (auto entity : entities) {
+						if (entity->skeleton->update)
+							entity->skeleton->update->run(entity);
+					}
+					simulationSteps++;
 				}
-				simulationSteps++;
 			}
 			
 			void draw() {
@@ -127,13 +133,13 @@ namespace nersis {
 			}
 			
 			int getLWorld(lua_State *L) {
-				luax_pushtype(L, PHYSICS_WORLD_ID, world);
+				luax_pushtype(L, "World", PHYSICS_WORLD_T, world);
 				return 1;
 			}
 		};
 		
 		NERSIS_API int registerSkeleton(Skeleton *skeleton);
-		NERSIS_API Entity *createEntityFromSkeleton(EntityContainer *container, int id);
+		NERSIS_API Entity *createEntityFromSkeleton(EntityContainer *container, int id, float x, float y);
 		NERSIS_API int findSkeletonByName(std::string name);
 	}
 }

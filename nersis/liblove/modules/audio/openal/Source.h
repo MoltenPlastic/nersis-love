@@ -29,14 +29,9 @@
 #include "sound/Decoder.h"
 
 // OpenAL
-#ifdef LOVE_APPLE_USE_FRAMEWORKS
-#ifdef LOVE_IOS
-#include <OpenAL/alc.h>
-#include <OpenAL/al.h>
-#else
+#ifdef LOVE_MACOSX_USE_FRAMEWORKS
 #include <OpenAL-Soft/alc.h>
 #include <OpenAL-Soft/al.h>
-#endif
 #else
 #include <AL/alc.h>
 #include <AL/al.h>
@@ -110,6 +105,7 @@ public:
 	virtual bool isRelative() const;
 	void setLooping(bool looping);
 	bool isLooping() const;
+	bool isStatic() const;
 	virtual void setMinVolume(float volume);
 	virtual float getMinVolume() const;
 	virtual void setMaxVolume(float volume);
@@ -170,9 +166,15 @@ private:
 
 	struct Cone
 	{
-		int innerAngle = 360; // degrees
-		int outerAngle = 360; // degrees
-		float outerVolume = 0.0f;
+		int innerAngle; // degrees
+		int outerAngle; // degrees
+		float outerVolume;
+
+		Cone()
+			: innerAngle(360)
+			, outerAngle(360)
+			, outerVolume(0.0f)
+		{}
 	} cone;
 
 	float offsetSamples;

@@ -24,7 +24,7 @@
 // LOVE
 #include "Image.h"
 #include "wrap_ImageData.h"
-#include "wrap_CompressedImageData.h"
+#include "wrap_CompressedData.h"
 
 namespace love
 {

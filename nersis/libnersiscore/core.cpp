@@ -14,7 +14,6 @@
 #endif
 
 using namespace love;
-using namespace love::window;
 using namespace love::graphics;
 using namespace love::math;
 using namespace love::event::sdl;
@@ -60,12 +59,12 @@ static int nersis_core_hello(lua_State *L) {
 static int nersis_core_love_run(lua_State *L) {
 	Math *math = Module::getInstance<Math>(Module::M_MATH);
 	Timer *timer = Module::getInstance<Timer>(Module::M_TIMER);
-	Window *window = Module::getInstance<Window>(Module::M_WINDOW);
+	window::Window *window = Module::getInstance<window::Window>(Module::M_WINDOW);
 	opengl::Graphics *graphics = Module::getInstance<opengl::Graphics>(Module::M_GRAPHICS);
 	Keyboard *keyboard = Module::getInstance<Keyboard>(Module::M_KEYBOARD);
 	
-	RandomGenerator::Seed seed; //will be random
-	math->setRandomSeed(seed);
+	//RandomGenerator::Seed seed; //will be random
+	//math->setRandomSeed(seed);
 	
 	//we manually keep track of SDL Events for the sake of Event module conversions that we don't want
 	//we can still use part of the event modules to push said conversions to lua
@@ -167,7 +166,7 @@ static int nersis_core_love_run(lua_State *L) {
 		}
 		
 		if (window->isCreated()) {
-			graphics->clear(graphics->getBackgroundColor());
+			graphics->clear();
 			graphics->origin();
 			for (auto module : nersis::moduleList()) {
 				module->draw();

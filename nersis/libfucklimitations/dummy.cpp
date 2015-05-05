@@ -42,7 +42,7 @@ static int nersis_fl_dlopen(lua_State *L) {
 	return 0;
 }
 
-LUALIB_API int luaopen_nersis_fucklimitations(lua_State *L) {
+extern "C" LUALIB_API int luaopen_nersis_fucklimitations(lua_State *L) {
 	lua_pushcfunction(L, nersis_fl_dlopen);
 	return 1;
 }

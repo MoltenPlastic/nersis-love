@@ -64,6 +64,11 @@ public:
 	void setPreviousVertex(float x, float y);
 
 	/**
+	 * Gets the number of children shapes.
+	 **/
+	int getChildCount() const;
+
+	/**
 	 * Returns a child EdgeShape.
 	 * @param index The index of the child shape.
 	 * @returns The specified child.

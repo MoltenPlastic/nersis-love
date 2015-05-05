@@ -47,13 +47,16 @@ public:
 	bool setFullscreen(bool fullscreen, FullscreenType fstype);
 	bool setFullscreen(bool fullscreen);
 
-	bool onSizeChanged(int width, int height);
+	bool onWindowResize(int width, int height);
 
 	int getDisplayCount() const;
 
 	const char *getDisplayName(int displayindex) const;
 
 	std::vector<WindowSize> getFullscreenSizes(int displayindex) const;
+
+	int getWidth() const;
+	int getHeight() const;
 
 	void getDesktopDimensions(int displayindex, int &width, int &height) const;
 
@@ -84,10 +87,6 @@ public:
 	void setMouseGrab(bool grab);
 	bool isMouseGrabbed() const;
 
-	void getPixelDimensions(int &w, int &h) const;
-	void windowToPixelCoords(double *x, double *y) const;
-	void pixelToWindowCoords(double *x, double *y) const;
-
 	double getPixelScale() const;
 
 	double toPixels(double x) const;
@@ -101,37 +100,28 @@ public:
 	int showMessageBox(const MessageBoxData &data);
 
 	static love::window::Window *createSingleton();
+	static love::window::Window *getSingleton();
 
 	const char *getName() const;
 
 private:
 
-	struct ContextAttribs
-	{
-		int versionMajor;
-		int versionMinor;
-		bool gles;
-		bool debug;
-	};
-
-	void setGLFramebufferAttributes(int msaa, bool sRGB);
-	void setGLContextAttributes(const ContextAttribs &attribs);
-	bool checkGLVersion(const ContextAttribs &attribs);
-	bool createWindowAndContext(int x, int y, int w, int h, Uint32 windowflags, int msaa, bool sRGB);
+	bool setContext(int msaa, bool vsync, bool sRGB);
+	void setWindowGLAttributes(int msaa, bool sRGB) const;
 
 	// Update the saved window settings based on the window's actual state.
 	void updateSettings(const WindowSettings &newsettings);
 
 	SDL_MessageBoxFlags convertMessageBoxType(MessageBoxType type) const;
 
-	std::string title;
+	std::string windowTitle;
 
 	struct _currentMode
 	{
-		int width  = 800;
-		int height = 600;
-		int pixelwidth = 800;
-		int pixelheight = 600;
+		_currentMode();
+
+		int width;
+		int height;
 		WindowSettings settings;
 		StrongRef<love::image::ImageData> icon;
 
@@ -143,9 +133,6 @@ private:
 
 	SDL_Window *window;
 	SDL_GLContext context;
-
-	bool displayedWindowError;
-	bool displayedContextError;
 
 }; // Window
 

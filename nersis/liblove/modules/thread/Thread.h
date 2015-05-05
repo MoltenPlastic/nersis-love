@@ -22,6 +22,7 @@
 #define LOVE_THREAD_THREAD_H
 
 // LOVE
+#include "common/runtime.h"
 #include "common/Object.h"
 
 namespace love
@@ -38,7 +39,7 @@ public:
 	virtual void wait() = 0;
 	virtual bool isRunning() = 0;
 
-}; // Thread
+}; // ThreadObject
 
 } // thread
 } // love

@@ -21,7 +21,12 @@
 #ifndef LOVE_OBJECT_H
 #define LOVE_OBJECT_H
 
-#include <atomic>
+/**
+ * NOTE: the fact that an SDL header is included in such a widely used header
+ * file is only temporary - in the LOVE 0.10+ codebase we use atomics from
+ * C++11's standard library.
+ **/
+#include <SDL_atomic.h>
 
 namespace love
 {
@@ -42,7 +47,6 @@ public:
 	 * Constructor. Sets reference count to one.
 	 **/
 	Object();
-	Object(const Object &other);
 
 	/**
 	 * Destructor.
@@ -53,7 +57,7 @@ public:
 	 * Gets the reference count of this Object.
 	 * @returns The reference count.
 	 **/
-	int getReferenceCount() const;
+	int getReferenceCount();
 
 	/**
 	 * Retains the Object, i.e. increases the
@@ -71,7 +75,7 @@ public:
 private:
 
 	// The reference count.
-	std::atomic<int> count;
+	SDL_atomic_t count;
 
 }; // Object
 

@@ -264,7 +264,7 @@ public:
 	 **/
 	void destroy();
 
-//private:
+private:
 
 	// Pointer to the Box2D world.
 	b2World *world;

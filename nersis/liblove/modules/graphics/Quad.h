@@ -40,6 +40,8 @@ public:
 		float w, h;
 	};
 
+	static const size_t NUM_VERTICES = 4;
+
 	Quad(const Viewport &v, float sw, float sh);
 	virtual ~Quad();
 
@@ -51,7 +53,7 @@ public:
 
 private:
 
-	Vertex vertices[4];
+	Vertex vertices[NUM_VERTICES];
 
 	Viewport viewport;
 	float sw;
